@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>连连看 - 连接游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-size: 2em;
+        }
+        .game-container {
+            background: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(6, 50px);
+            gap: 5px;
+            background: rgba(100,150,200,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+        }
+        .tile {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .tile.selected {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(255,150,100,0.8);
+            border: 3px solid #ff9500;
+        }
+        .tile.matched {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+        .tile.empty {
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .score-board {
+            margin-top: 20px;
+            font-size: 1.3em;
+            display: flex;
+            gap: 30px;
+            background: rgba(255,255,255,0.8);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #333;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 20px;
+            transition: background 0.2s ease;
+        }
+        .back-link:hover {
+            background: rgba(255,255,255,0.7);
+        }
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+        }
+        .message h2 {
+            color: #4ecca3;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .timer {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @media (max-width: 500px) {
+            #gameBoard {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(6, 40px);
+                gap: 3px;
+            }
+            .tile {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← 返回首页</a>
+    
+    <h1>🔗 连连看</h1>
+    
+    <div class="game-container">
+        <div id="gameBoard"></div>
+    </div>
+    
+    <div class="score-board">
+        <div>剩余：<span id="remaining">0</span></div>
+        <div>时间：<span id="timer" class="timer">0</span>s</div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" onclick="initGame()">新游戏</button>
+        <button class="btn" onclick="hint()">提示</button>
+    </div>
+    
+    <div class="message" id="message">
+        <h2>🎉 恭喜通关!</h2>
+        <p>用时：<span id="finalTime">0</span>秒</p>
+        <button class="btn" onclick="initGame()" style="margin-top: 20px;">再来一局</button>
+    </div>
+
+    <script>
+        const emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+        const rows = 6;
+        const cols = 8;
+        let board = [];
+        let selectedTile = null;
+        let remaining = 0;
+        let timer = 0;
+        let timerInterval = null;
+        let isProcessing = false;
+        
+        function createBoard() {
+            const totalTiles = rows * cols;
+            const pairsNeeded = totalTiles / 2;
+            const tilePairs = [];
+            
+            for (let i = 0; i < pairsNeeded; i++) {
+                const emoji = emojis[i % emojis.length];
+                tilePairs.push(emoji, emoji);
+            }
+            
+            // 洗牌
+            for (let i = tilePairs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tilePairs[i], tilePairs[j]] = [tilePairs[j], tilePairs[i]];
+            }
+            
+            board = [];
+            let idx = 0;
+            for (let row = 0; row < rows; row++) {
+                board[row] = [];
+                for (let col = 0; col < cols; col++) {
+                    board[row][col] = tilePairs[idx++];
+                }
+            }
+            
+            remaining = totalTiles;
+        }
+        
+        function renderBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const tile = document.createElement('div');
+                    tile.className = board[row][col] ? 'tile' : 'tile empty';
+                    tile.textContent = board[row][col] || '';
+                    tile.dataset.row = row;
+                    tile.dataset.col = col;
+                    if (board[row][col]) {
+                        tile.onclick = () => handleTileClick(row, col);
+                    }
+                    gameBoard.appendChild(tile);
+                }
+            }
+            
+            document.getElementById('remaining').textContent = remaining;
+        }
+        
+        function handleTileClick(row, col) {
+            if (isProcessing || !board[row][col]) return;
+            
+            const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            if (!selectedTile) {
+                selectedTile = {row, col};
+                tile.classList.add('selected');
+            } else {
+                const prevTile = document.querySelector(`[data-row="${selectedTile.row}"][data-col="${selectedTile.col}"]`);
+                
+                if (selectedTile.row === row && selectedTile.col === col) {
+                    tile.classList.remove('selected');
+                    selectedTile = null;
+                    return;
+                }
+                
+                prevTile.classList.remove('selected');
+                
+                if (board[selectedTile.row][selectedTile.col] === board[row][col]) {
+                    if (canConnect(selectedTile.row, selectedTile.col, row, col)) {
+                        isProcessing = true;
+                        
+                        // 画线效果
+                        drawLine(selectedTile.row, selectedTile.col, row, col);
+                        
+                        setTimeout(() => {
+                            board[selectedTile.row][selectedTile.col] = null;
+                            board[row][col] = null;
+                            remaining -= 2;
+                            document.getElementById('remaining').textContent = remaining;
+                            
+                            if (remaining === 0) {
+                                winGame();
+                            }
+                            
+                            selectedTile = null;
+                            isProcessing = false;
+                            renderBoard();
+                        }, 300);
+                    } else {
+                        selectedTile = {row, col};
+                        tile.classList.add('selected');
+                    }
+                } else {
+                    selectedTile = {row, col};
+                    tile.classList.add('selected');
+                }
+            }
+        }
+        
+        function canConnect(r1, c1, r2, c2) {
+            // 检查直线连接
+            if (r1 === r2) {
+                return checkHorizontal(r1, c1, c2);
+            }
+            if (c1 === c2) {
+                return checkVertical(c1, r1, r2);
+            }
+            
+            // 检查一个转弯
+            if (checkHorizontal(r1, c1, c2) && checkVertical(c2, r1, r2)) return true;
+            if (checkVertical(c1, r1, r2) && checkHorizontal(r2, c1, c2)) return true;
+            
+            // 检查两个转弯
+            for (let r = 0; r < rows; r++) {
+                if (r !== r1 && r !== r2) {
+                    if (checkVertical(c1, r1, r) && checkHorizontal(r, c1, c2) && checkVertical(c2, r, r2)) {
+                        return true;
+                    }
+                }
+            }
+            for (let c = 0; c < cols; c++) {
+                if (c !== c1 && c !== c2) {
+                    if (checkHorizontal(r1, c1, c) && checkVertical(c, r1, r2) && checkHorizontal(r2, c, c2)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        function checkHorizontal(row, c1, c2) {
+            const min = Math.min(c1, c2);
+            const max = Math.max(c1, c2);
+            for (let c = min + 1; c < max; c++) {
+                if (board[row][c] !== null) return false;
+            }
+            return true;
+        }
+        
+        function checkVertical(col, r1, r2) {
+            const min = Math.min(r1, r2);
+            const max = Math.max(r1, r2);
+            for (let r = min + 1; r < max; r++) {
+                if (board[r][col] !== null) return false;
+            }
+            return true;
+        }
+        
+        function drawLine(r1, c1, r2, c2) {
+            // 简单闪烁效果
+            const tile1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
+            const tile2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
+            tile1.style.background = '#4ecca3';
+            tile2.style.background = '#4ecca3';
+            setTimeout(() => {
+                tile1.style.background = 'white';
+                tile2.style.background = 'white';
+            }, 200);
+        }
+        
+        function hint() {
+            if (isProcessing) return;
+            
+            for (let r1 = 0; r1 < rows; r1++) {
+                for (let c1 = 0; c1 < cols; c1++) {
+                    if (!board[r1][c1]) continue;
+                    
+                    for (let r2 = 0; r2 < rows; r2++) {
+                        for (let c2 = 0; c2 < cols; c2++) {
+                            if (r1 === r2 && c1 === c2) continue;
+                            if (!board[r2][c2]) continue;
+                            
+                            if (board[r1][c1] === board[r2][c2] && canConnect(r1, c1, r2, c2)) {
+                                const tile1 = document.querySelector(`[data-row="${r1}"][data-col="${c1}"]`);
+                                const tile2 = document.querySelector(`[data-row="${r2}"][data-col="${c2}"]`);
+                                tile1.style.background = '#ffeb3b';
+                                tile2.style.background = '#ffeb3b';
+                                setTimeout(() => {
+                                    tile1.style.background = 'white';
+                                    tile2.style.background = 'white';
+                                }, 1000);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            alert('没有找到可连接的配对！试试重新排列？');
+        }
+        
+        function startTimer() {
+            timer = 0;
+            timerInterval = setInterval(() => {
+                timer++;
+                document.getElementById('timer').textContent = timer;
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        function winGame() {
+            stopTimer();
+            document.getElementById('finalTime').textContent = timer;
+            document.getElementById('message').style.display = 'block';
+        }
+        
+        function initGame() {
+            stopTimer();
+            document.getElementById('message').style.display = 'none';
+            selectedTile = null;
+            isProcessing = false;
+            createBoard();
+            renderBoard();
+            startTimer();
+        }
+        
+        initGame();
+    </script>
+</body>
+</html>
