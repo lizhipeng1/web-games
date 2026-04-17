@@ -90,24 +90,35 @@
         .mobile-controls {
             display: none;
             margin-top: 20px;
-            gap: 10px;
+            gap: 5px;
         }
         .mobile-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            width: 65px;
+            height: 65px;
+            border-radius: 15px;
+            background: rgba(78, 204, 163, 0.3);
             border: 2px solid #4ecca3;
             color: white;
-            font-size: 1.5em;
+            font-size: 1.8em;
             cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .mobile-btn:active {
+            background: rgba(78, 204, 163, 0.6);
+            transform: scale(0.95);
+        }
+        .dpad-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .dpad-spacer {
+            width: 65px;
+            height: 65px;
         }
         @media (max-width: 600px) {
             .mobile-controls {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                max-width: 200px;
+                display: block;
             }
             #gameCanvas {
                 max-width: 300px;
@@ -134,10 +145,16 @@
     </div>
     
     <div class="mobile-controls">
-        <button class="mobile-btn" onclick="changeDirection('up')">↑</button>
-        <button class="mobile-btn" onclick="changeDirection('left')">←</button>
-        <button class="mobile-btn" onclick="changeDirection('down')">↓</button>
-        <button class="mobile-btn" onclick="changeDirection('right')">→</button>
+        <div class="dpad-row">
+            <div class="dpad-spacer"></div>
+            <button class="mobile-btn" onclick="changeDirection('up')">↑</button>
+            <div class="dpad-spacer"></div>
+        </div>
+        <div class="dpad-row">
+            <button class="mobile-btn" onclick="changeDirection('left')">←</button>
+            <button class="mobile-btn" onclick="changeDirection('down')">↓</button>
+            <button class="mobile-btn" onclick="changeDirection('right')">→</button>
+        </div>
     </div>
     
     <div class="game-over" id="gameOver">
@@ -377,6 +394,46 @@
         // 初始绘制
         initGame();
         draw();
+        
+        // 触摸滑动控制
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const minSwipeDistance = 30;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, {passive: false});
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+            
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                // 水平滑动
+                if (Math.abs(diffX) > minSwipeDistance) {
+                    if (diffX > 0) {
+                        changeDirection('right');
+                    } else {
+                        changeDirection('left');
+                    }
+                }
+            } else {
+                // 垂直滑动
+                if (Math.abs(diffY) > minSwipeDistance) {
+                    if (diffY > 0) {
+                        changeDirection('down');
+                    } else {
+                        changeDirection('up');
+                    }
+                }
+            }
+        }, {passive: false});
     </script>
 </body>
 </html>
