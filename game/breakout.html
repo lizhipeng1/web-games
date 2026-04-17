@@ -348,6 +348,7 @@
         
         // 鼠标/触摸控制
         canvas.addEventListener('mousemove', (e) => {
+            if (!gameRunning || isPaused) return;
             const relativeX = e.clientX - canvas.offsetLeft;
             if (relativeX > 0 && relativeX < canvas.width) {
                 paddle.x = relativeX - paddleWidth/2;
@@ -356,10 +357,18 @@
         
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const relativeX = e.touches[0].clientX - canvas.offsetLeft;
-            if (relativeX > 0 && relativeX < canvas.width) {
-                paddle.x = relativeX - paddleWidth/2;
-            }
+            if (!gameRunning || isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            paddle.x = Math.max(0, Math.min(touchX - paddleWidth/2, canvas.width - paddleWidth));
+        }, {passive: false});
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            paddle.x = Math.max(0, Math.min(touchX - paddleWidth/2, canvas.width - paddleWidth));
         }, {passive: false});
         
         // 自动移动
