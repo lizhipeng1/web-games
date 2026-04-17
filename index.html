@@ -3,166 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>经典网页游戏合集</title>
+    <title>Web Games - 在线游戏集合</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 40px 20px;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+
         h1 {
-            text-align: center;
-            color: white;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            color: #fff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            font-size: 3em;
         }
+
         .subtitle {
-            text-align: center;
             color: rgba(255,255,255,0.9);
             margin-bottom: 40px;
-            font-size: 1.1em;
+            font-size: 1.2em;
         }
-        .game-grid {
+
+        .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
-            padding: 20px;
+            max-width: 1000px;
+            width: 100%;
         }
+
         .game-card {
-            background: white;
+            background: rgba(255,255,255,0.95);
             border-radius: 20px;
-            overflow: hidden;
+            padding: 30px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
         }
+
         .game-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .game-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .game-info {
-            padding: 25px;
-        }
-        .game-info h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.4em;
-        }
-        .game-info p {
-            color: #666;
-            line-height: 1.6;
+
+        .game-icon {
+            font-size: 64px;
             margin-bottom: 15px;
         }
-        .play-btn {
+
+        .game-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-desc {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .game-tag {
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: transform 0.2s ease;
-        }
-        .play-btn:hover {
-            transform: scale(1.05);
-        }
-        .difficulty {
-            display: inline-block;
-            padding: 5px 12px;
+            color: #fff;
+            padding: 5px 15px;
             border-radius: 15px;
-            font-size: 0.85em;
-            margin-top: 10px;
+            font-size: 12px;
+            margin-top: 15px;
         }
-        .easy { background: #d4edda; color: #155724; }
-        .medium { background: #fff3cd; color: #856404; }
-        .difficulty { background: #f8d7da; color: #721c24; }
-        .game-card-img {
-            width: 100%;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5em;
-            font-weight: bold;
-        }
-        .snake-bg { background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); }
-        .match3-bg { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .connect-bg { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .breakout-bg { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
         footer {
-            text-align: center;
-            color: rgba(255,255,255,0.8);
             margin-top: 50px;
-            padding: 20px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+
+        footer a {
+            color: #fff;
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 经典网页游戏合集</h1>
-        <p class="subtitle">无需下载，即点即玩！</p>
-        
-        <div class="game-grid">
-            <div class="game-card">
-                <div class="game-card-img snake-bg">🐍</div>
-                <div class="game-info">
-                    <h3>🐍 贪吃蛇</h3>
-                    <p>经典怀旧游戏，控制小蛇吃掉食物，注意不要撞到自己哦！</p>
-                    <a href="game/snake.html" class="play-btn">开始游戏</a>
-                    <span class="difficulty easy">简单</span>
-                </div>
-            </div>
-            
-            <div class="game-card">
-                <div class="game-card-img match3-bg">🍬</div>
-                <div class="game-info">
-                    <h3>🍬 消消乐</h3>
-                    <p>三消游戏，匹配三个或更多相同图案，挑战高分！</p>
-                    <a href="game/match3.html" class="play-btn">开始游戏</a>
-                    <span class="difficulty medium">中等</span>
-                </div>
-            </div>
-            
-            <div class="game-card">
-                <div class="game-card-img connect-bg">🔗</div>
-                <div class="game-info">
-                    <h3>🔗 连连看</h3>
-                    <p>找到相同的图案并用不超过三根直线连接它们！</p>
-                    <a href="game/connect.html" class="play-btn">开始游戏</a>
-                    <span class="difficulty medium">中等</span>
-                </div>
-            </div>
-            
-            <div class="game-card">
-                <div class="game-card-img breakout-bg">🧱</div>
-                <div class="game-info">
-                    <h3>🧱 打砖块</h3>
-                    <p>控制挡板反弹小球，消除所有砖块通关！</p>
-                    <a href="game/breakout.html" class="play-btn">开始游戏</a>
-                    <span class="difficulty hard">困难</span>
-                </div>
-            </div>
+    <h1>🎮 Web Games</h1>
+    <p class="subtitle">在线小游戏集合 - 即点即玩</p>
+
+    <div class="games-grid">
+        <a href="./mahjong/" class="game-card">
+            <div class="game-icon">🀄</div>
+            <div class="game-title">麻将游戏</div>
+            <div class="game-desc">经典单机麻将，与 AI 对战<br>完整牌型，精美界面</div>
+            <span class="game-tag">单机</span>
+            <span class="game-tag">益智</span>
+        </a>
+
+        <!-- 更多游戏将在这里添加 -->
+        <div class="game-card" style="opacity: 0.6;">
+            <div class="game-icon">🎲</div>
+            <div class="game-title">更多游戏</div>
+            <div class="game-desc">敬请期待...<br>欢迎贡献你的游戏!</div>
+            <span class="game-tag">Coming Soon</span>
         </div>
-        
-        <footer>
-            <p>© 2024 经典网页游戏合集 | 由 GitHub Pages 托管</p>
-        </footer>
     </div>
+
+    <footer>
+        <p>Hosted on GitHub Pages</p>
+        <p><a href="https://github.com/lizhipeng1/web-games" target="_blank">View on GitHub</a></p>
+    </footer>
 </body>
 </html>
